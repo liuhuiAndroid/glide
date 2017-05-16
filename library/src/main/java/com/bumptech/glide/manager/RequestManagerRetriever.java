@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Retriever:寻猎物犬
  * A collection of static methods for creating new {@link com.bumptech.glide.RequestManager}s or retrieving existing
  * ones from activities and fragment.
  */
@@ -28,7 +29,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     private static final String TAG = "RMRetriever";
     static final String FRAGMENT_TAG = "com.bumptech.glide.manager";
 
-    /** The singleton instance of RequestManagerRetriever. */
+    /** The singleton instance of RequestManagerRetriever. 单例*/
     private static final RequestManagerRetriever INSTANCE = new RequestManagerRetriever();
 
     private static final int ID_REMOVE_FRAGMENT_MANAGER = 1;
@@ -91,7 +92,9 @@ public class RequestManagerRetriever implements Handler.Callback {
                 return get(((ContextWrapper) context).getBaseContext());
             }
         }
-
+        // 简单的一种情况 : 传入Application参数的情况
+        // 因为Application对象的生命周期即应用程序的生命周期，因此Glide并不需要做什么特殊的处理，
+        // 它自动就是和应用程序的生命周期是同步的，如果应用程序关闭的话，Glide的加载也会同时终止。
         return getApplicationManager(context);
     }
 
@@ -120,6 +123,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public RequestManager get(Activity activity) {
         if (Util.isOnBackgroundThread() || Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+            // 如果我们是在非主线程当中使用的Glide，那么不管你是传入的Activity还是Fragment，都会被强制当成Application来处理
             return get(activity.getApplicationContext());
         } else {
             assertNotDestroyed(activity);
@@ -165,6 +169,7 @@ public class RequestManagerRetriever implements Handler.Callback {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     RequestManager fragmentGet(Context context, android.app.FragmentManager fm) {
+        // 117
         RequestManagerFragment current = getRequestManagerFragment(fm);
         RequestManager requestManager = current.getRequestManager();
         if (requestManager == null) {
@@ -192,6 +197,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
 
     RequestManager supportFragmentGet(Context context, FragmentManager fm) {
+        // 141
         SupportRequestManagerFragment current = getSupportRequestManagerFragment(fm);
         RequestManager requestManager = current.getRequestManager();
         if (requestManager == null) {

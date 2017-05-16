@@ -623,6 +623,7 @@ public class Glide {
      *
      * @param context Any context, will not be retained.
      * @return A RequestManager for the top level application that can be used to start a load.
+     * 第一个with()方法的源码还是比较好理解的。其实就是为了得到一个RequestManager对象而已
      */
     public static RequestManager with(Context context) {
         RequestManagerRetriever retriever = RequestManagerRetriever.get();
@@ -635,6 +636,7 @@ public class Glide {
      *
      * @param activity The activity to use.
      * @return A RequestManager for the given activity that can be used to start a load.
+     * 第一个with()方法的源码还是比较好理解的。其实就是为了得到一个RequestManager对象而已
      */
     public static RequestManager with(Activity activity) {
         RequestManagerRetriever retriever = RequestManagerRetriever.get();
@@ -647,6 +649,7 @@ public class Glide {
      *
      * @param activity The activity to use.
      * @return A RequestManager for the given FragmentActivity that can be used to start a load.
+     * 第一个with()方法的源码还是比较好理解的。其实就是为了得到一个RequestManager对象而已
      */
     public static RequestManager with(FragmentActivity activity) {
         RequestManagerRetriever retriever = RequestManagerRetriever.get();
@@ -659,6 +662,7 @@ public class Glide {
      *
      * @param fragment The fragment to use.
      * @return A RequestManager for the given Fragment that can be used to start a load.
+     * 第一个with()方法的源码还是比较好理解的。其实就是为了得到一个RequestManager对象而已
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static RequestManager with(android.app.Fragment fragment) {
@@ -672,6 +676,7 @@ public class Glide {
      *
      * @param fragment The fragment to use.
      * @return A RequestManager for the given Fragment that can be used to start a load.
+     * 第一个with()方法的源码还是比较好理解的。其实就是为了得到一个RequestManager对象而已
      */
     public static RequestManager with(Fragment fragment) {
         RequestManagerRetriever retriever = RequestManagerRetriever.get();

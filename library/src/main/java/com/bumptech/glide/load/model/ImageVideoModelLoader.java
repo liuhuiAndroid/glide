@@ -40,10 +40,15 @@ public class ImageVideoModelLoader<A> implements ModelLoader<A, ImageVideoWrappe
         }
         DataFetcher<ParcelFileDescriptor> fileDescriptorFetcher = null;
         if (fileDescriptorLoader != null) {
+            // 先调用streamLoader.getResourceFetcher()方法获取一个DataFetcher
+            //而这个streamLoader其实就是我们在loadGeneric()方法中构建出的StreamStringLoader，
+            // 调用它的getResourceFetcher()方法会得到一个HttpUrlFetcher对象
             fileDescriptorFetcher = fileDescriptorLoader.getResourceFetcher(model, width, height);
         }
 
         if (streamFetcher != null || fileDescriptorFetcher != null) {
+            // new出了一个ImageVideoFetcher对象，并把获得的HttpUrlFetcher对象传进去
+            // 也就是说，ImageVideoModelLoader的getResourceFetcher()方法得到的是一个ImageVideoFetcher。
             return new ImageVideoFetcher(streamFetcher, fileDescriptorFetcher);
         } else {
             return null;

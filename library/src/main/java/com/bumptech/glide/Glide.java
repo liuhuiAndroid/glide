@@ -293,6 +293,14 @@ public class Glide {
         return dataLoadProviderRegistry.get(dataClass, decodedClass);
     }
 
+    /**
+     * Target对象则是用来最终展示图片用的
+     * 构建出了一个GlideDrawableImageViewTarget对象Target
+     * @param imageView
+     * @param transcodedClass
+     * @param <R>
+     * @return
+     */
     <R> Target<R> buildImageViewTarget(ImageView imageView, Class<R> transcodedClass) {
         return imageViewTargetFactory.buildTarget(imageView, transcodedClass);
     }

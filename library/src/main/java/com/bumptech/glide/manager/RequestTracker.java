@@ -30,12 +30,17 @@ public class RequestTracker {
 
     /**
      * Starts tracking the given request.
+     * 先判断Glide当前是不是处理暂停状态，
+     * 如果不是暂停状态就调用Request的begin()方法来执行Request，
+     * 否则的话就先将Request添加到待执行队列里面，等暂停状态解除了之后再执行。
      */
     public void runRequest(Request request) {
         requests.add(request);
         if (!isPaused) {
+            // 进去看看，Request对象是一个GenericRequest，需要看GenericRequest中的begin()方法了
             request.begin();
         } else {
+            //暂停请求的功能仍然不是这篇文章所关心的,忽略。文章：郭霖Glide（二）
             pendingRequests.add(request);
         }
     }

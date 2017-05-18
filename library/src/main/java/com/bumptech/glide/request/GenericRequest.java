@@ -89,6 +89,9 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     private long startTime;
     private Status status;
 
+    /**
+     * obtain()方法实际上获得的就是一个GenericRequest对象
+     */
     public static <A, T, Z, R> GenericRequest<A, T, Z, R> obtain(
             LoadProvider<A, T, Z, R> loadProvider,
             A model,
@@ -116,8 +119,10 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         @SuppressWarnings("unchecked")
         GenericRequest<A, T, Z, R> request = (GenericRequest<A, T, Z, R>) REQUEST_POOL.poll();
         if (request == null) {
+            //new了一个GenericRequest对象，并在最后一行返回
             request = new GenericRequest<A, T, Z, R>();
         }
+        // init方法主要就是一些赋值的代码，不需要细看了
         request.init(loadProvider,
                 model,
                 signature,
@@ -260,19 +265,30 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
     @Override
     public void begin() {
         startTime = LogTime.getLogTime();
+        // 首先如果model等于null，model也就是我们在第二步load()方法中传入的图片URL地址，这个时候会调用onException()方法。
+        // 如果你跟到onException()方法里面去看看，你会发现它最终会调用到一个setErrorPlaceholder()
         if (model == null) {
             onException(null);
             return;
         }
 
         status = Status.WAITING_FOR_SIZE;
+        //使用了override() API为图片指定了一个固定的宽高
         if (Util.isValidDimensions(overrideWidth, overrideHeight)) {
+            // 指定了固定宽高
+            // 具体的图片加载
+            // 进入查看
             onSizeReady(overrideWidth, overrideHeight);
         } else {
+            // 没有指定固定宽高
+            // target.getSize()方法的内部会根据ImageView的layout_width和layout_height值做一系列的计算，来算出图片应该的宽高
+            // 在计算完之后，它也会调用onSizeReady()方法。
+            // 具体的图片加载
             target.getSize(this);
         }
 
         if (!isComplete() && !isFailed() && canNotifyStatusChanged()) {
+            //在图片请求开始之前，会先使用这张占位图代替最终的图片显示
             target.onLoadStarted(getPlaceholderDrawable());
         }
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -389,6 +405,11 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
       return fallbackDrawable;
     }
 
+    /**
+     * 这个方法中会先去获取一个error的占位图，
+     * 如果获取不到的话会再去获取一个loading占位图，然后调用target.onLoadFailed()方法并将占位图传入
+     * @param e
+     */
     private void setErrorPlaceholder(Exception e) {
         if (!canNotifyStatusChanged()) {
             return;
@@ -401,6 +422,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         if (error == null) {
             error = getPlaceholderDrawable();
         }
+        //进去，ImageViewTarget的onLoadFailed方法
         target.onLoadFailed(e, error);
     }
 
@@ -434,18 +456,25 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         width = Math.round(sizeMultiplier * width);
         height = Math.round(sizeMultiplier * height);
 
+        // loadProvider是什么?查看DrawableTypeRequest构造函数
+        // 分别调用了loadProvider的getModelLoader()方法和getTranscoder()方法，
+        // 那么得到的对象也就是刚才我们在DrawableTypeRequest中分析的ImageVideoModelLoader和GifBitmapWrapperDrawableTranscoder了
         ModelLoader<A, T> modelLoader = loadProvider.getModelLoader();
+        // 进去查看ImageVideoModelLoader的getResourceFetcher()方法
         final DataFetcher<T> dataFetcher = modelLoader.getResourceFetcher(model, width, height);
 
         if (dataFetcher == null) {
             onException(new Exception("Failed to load model: \'" + model + "\'"));
             return;
         }
+        //
         ResourceTranscoder<Z, R> transcoder = loadProvider.getTranscoder();
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logV("finished setup for calling load in " + LogTime.getElapsedMillis(startTime));
         }
         loadedFromMemoryCache = true;
+        // 这里将刚才获得的ImageVideoFetcher、GifBitmapWrapperDrawableTranscoder等等一系列的值一起传入到了Engine的load()方法当中
+        // 进去看看
         loadStatus = engine.load(signature, width, height, dataFetcher, loadProvider, transformation, transcoder,
                 priority, isMemoryCacheable, diskCacheStrategy, this);
         loadedFromMemoryCache = resource != null;
@@ -545,6 +574,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         status = Status.FAILED;
         //TODO: what if this is a thumbnail request?
         if (requestListener == null || !requestListener.onException(e, model, target, isFirstReadyResource())) {
+            // 进去瞧瞧
             setErrorPlaceholder(e);
         }
     }

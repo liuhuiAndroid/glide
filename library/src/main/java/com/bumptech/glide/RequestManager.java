@@ -279,6 +279,7 @@ public class RequestManager implements LifecycleListener {
      * @see #load(Object)
      *
      * @param string A file path, or a uri or url handled by {@link com.bumptech.glide.load.model.UriLoader}.
+     * DrawableTypeRequest的父类是DrawableRequestBuilder,里面有Glide绝大多数的API
      */
     public DrawableTypeRequest<String> load(String string) {
         return (DrawableTypeRequest<String>) fromString().load(string);

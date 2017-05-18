@@ -42,12 +42,20 @@ public class DrawableTypeRequest<ModelType> extends DrawableRequestBuilder<Model
         }
 
         if (transcoder == null) {
+            // 调用了glide.buildTranscoder()方法来构建一个ResourceTranscoder
+            // 它是用于对图片进行转码的，
+            // 由于ResourceTranscoder是一个接口，这里实际会构建出一个GifBitmapWrapperDrawableTranscoder对象。
             transcoder = glide.buildTranscoder(resourceClass, transcodedClass);
         }
+        // 调用了glide.buildDataProvider()方法来构建一个DataLoadProvider，
+        // 它是用于对图片进行编解码的，由于DataLoadProvider是一个接口，这里实际会构建出一个ImageVideoGifDrawableLoadProvider对象。
         DataLoadProvider<ImageVideoWrapper, Z> dataLoadProvider = glide.buildDataProvider(ImageVideoWrapper.class,
                 resourceClass);
+        // new了一个ImageVideoModelLoader的实例，并把之前loadGeneric()方法中构建的两个ModelLoader封装到了ImageVideoModelLoader当中。
         ImageVideoModelLoader<A> modelLoader = new ImageVideoModelLoader<A>(streamModelLoader,
                 fileDescriptorModelLoader);
+        // new出一个FixedLoadProvider，并把刚才构建的出来的GifBitmapWrapperDrawableTranscoder、ImageVideoModelLoader、
+        // ImageVideoGifDrawableLoadProvider都封装进去，这个也就是GenericRequest中onSizeReady()方法中的loadProvider了。
         return new FixedLoadProvider<A, ImageVideoWrapper, Z, R>(modelLoader, transcoder, dataLoadProvider);
     }
 
@@ -55,6 +63,10 @@ public class DrawableTypeRequest<ModelType> extends DrawableRequestBuilder<Model
             ModelLoader<ModelType, ParcelFileDescriptor> fileDescriptorModelLoader, Context context, Glide glide,
             RequestTracker requestTracker, Lifecycle lifecycle, RequestManager.OptionsApplier optionsApplier) {
         super(context, modelClass,
+                //调用了一个buildProvider()方法，
+                // 并把streamModelLoader和fileDescriptorModelLoader等参数传入到这个方法中，
+                // 这两个ModelLoader就是之前在loadGeneric()方法中构建出来的
+                //进去查看
                 buildProvider(glide, streamModelLoader, fileDescriptorModelLoader, GifBitmapWrapper.class,
                         GlideDrawable.class, null),
                 glide, requestTracker, lifecycle);

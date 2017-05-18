@@ -53,6 +53,7 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z> implem
      * {@link android.widget.ImageView#setImageDrawable(android.graphics.drawable.Drawable)}.
      *
      * @param errorDrawable {@inheritDoc}
+     * 将这张error占位图显示到ImageView上
      */
     @Override
     public void onLoadFailed(Exception e, Drawable errorDrawable) {

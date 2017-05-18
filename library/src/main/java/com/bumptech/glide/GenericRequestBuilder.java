@@ -655,9 +655,12 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
             previous.recycle();
         }
 
+        // 重点：构建出了一个Request对象，Request是用来发出加载图片请求的
+        // 进去看buildRequest()方法是如何构建Request对象的
         Request request = buildRequest(target);
         target.setRequest(request);
         lifecycle.addListener(target);
+        // 重点：执行这个Request，进去瞧一瞧
         requestTracker.runRequest(request);
 
         return target;
@@ -787,9 +790,11 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
         if (priority == null) {
             priority = Priority.NORMAL;
         }
+        // 进入查看
         return buildRequestRecursive(target, null);
     }
 
+    // 其中90%的代码都是在处理缩略图
     private Request buildRequestRecursive(Target<TranscodeType> target, ThumbnailRequestCoordinator parentCoordinator) {
         if (thumbnailRequestBuilder != null) {
             if (isThumbnailBuilt) {
@@ -829,12 +834,14 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
             return coordinator;
         } else {
             // Base case: no thumbnail.
+            // 主流程只需要看这一句，调用了obtainRequest()方法来获取一个Request对象
             return obtainRequest(target, sizeMultiplier, priority, parentCoordinator);
         }
     }
 
     private Request obtainRequest(Target<TranscodeType> target, float sizeMultiplier, Priority priority,
             RequestCoordinator requestCoordinator) {
+        // 刚才在load()方法中调用的所有API，其实都是在这里组装到Request对象当中的。
         return GenericRequest.obtain(
                 loadProvider,
                 model,

@@ -39,6 +39,10 @@ public class BitmapResource implements Resource<Bitmap> {
         this.bitmapPool = bitmapPool;
     }
 
+    /**
+     * 如果我还需要获取Bitmap，只需要调用Resource<Bitmap>的get()方法就可以了。
+     * @return
+     */
     @Override
     public Bitmap get() {
         return bitmap;

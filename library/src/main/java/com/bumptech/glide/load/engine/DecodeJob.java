@@ -123,9 +123,14 @@ class DecodeJob<A, T, Z> {
      * </p>
      *
      * @throws Exception
+     * 方法分为两部：
+     * 第一步是调用decodeSource()方法来获得一个Resource对象，
+     * 第二步是调用transformEncodeAndTranscode()方法来处理这个Resource对象。
      */
     public Resource<Z> decodeFromSource() throws Exception {
+        // 进去看看
         Resource<T> decoded = decodeSource();
+        //看完上面的逻辑再进去瞧瞧
         return transformEncodeAndTranscode(decoded);
     }
 
@@ -134,6 +139,9 @@ class DecodeJob<A, T, Z> {
         fetcher.cancel();
     }
 
+    /**
+     *
+     */
     private Resource<Z> transformEncodeAndTranscode(Resource<T> decoded) {
         long startTime = LogTime.getLogTime();
         Resource<T> transformed = transform(decoded);
@@ -144,6 +152,7 @@ class DecodeJob<A, T, Z> {
         writeTransformedToCache(transformed);
 
         startTime = LogTime.getLogTime();
+        // 这里调用了一个transcode()方法，就把Resource<T>对象转换成Resource<Z>对象了。
         Resource<Z> result = transcode(transformed);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logWithTimeAndKey("Transcoded transformed from source", startTime);
@@ -167,6 +176,8 @@ class DecodeJob<A, T, Z> {
         Resource<T> decoded = null;
         try {
             long startTime = LogTime.getLogTime();
+            // 调用了fetcher.loadData()方法
+            // 这个fetcher是什么呢？其实就是刚才在onSizeReady()方法中得到的ImageVideoFetcher对象，这里调用它的loadData()方法
             final A data = fetcher.loadData(priority);
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 logWithTimeAndKey("Fetched data", startTime);
@@ -174,6 +185,7 @@ class DecodeJob<A, T, Z> {
             if (isCancelled) {
                 return null;
             }
+            // 进去看看
             decoded = decodeFromSourceData(data);
         } finally {
             fetcher.cleanup();
@@ -181,12 +193,18 @@ class DecodeJob<A, T, Z> {
         return decoded;
     }
 
+    /**
+     * decodeFromSourceData()方法返回的是一个Resource<T>对象，其实也就是Resource<GifBitmapWrapper>对象了
+     */
     private Resource<T> decodeFromSourceData(A data) throws IOException {
         final Resource<T> decoded;
         if (diskCacheStrategy.cacheSource()) {
             decoded = cacheAndDecodeSourceData(data);
         } else {
             long startTime = LogTime.getLogTime();
+            // 调用了loadProvider.getSourceDecoder().decode()方法来进行解码
+            // loadProvider就是刚才在onSizeReady()方法中得到的FixedLoadProvider
+            // getSourceDecoder()得到的则是一个GifBitmapWrapperResourceDecoder对象，也就是要调用这个对象的decode()方法来对图片进行解码
             decoded = loadProvider.getSourceDecoder().decode(data, width, height);
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 logWithTimeAndKey("Decoded from source", startTime);
@@ -240,10 +258,21 @@ class DecodeJob<A, T, Z> {
         return transformed;
     }
 
+    /**
+     * decodeFromSource()方法得到了Resource<Z>对象,当然也就是Resource<GlideDrawable>对象
+     */
     private Resource<Z> transcode(Resource<T> transformed) {
         if (transformed == null) {
             return null;
         }
+        // transcode()方法中又是调用了transcoder的transcode()
+
+        //在第二步load()方法返回的那个DrawableTypeRequest对象，它的构建函数中去构建了一个FixedLoadProvider对象，
+        // 然后我们将三个参数传入到了FixedLoadProvider当中，其中就有一个GifBitmapWrapperDrawableTranscoder对象。
+        // 后来在onSizeReady()方法中获取到了这个参数，并传递到了Engine当中，然后又由Engine传递到了DecodeJob当中。
+        // 因此，这里的transcoder其实就是这个GifBitmapWrapperDrawableTranscoder对象
+
+        //
         return transcoder.transcode(transformed);
     }
 

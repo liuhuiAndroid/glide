@@ -46,6 +46,9 @@ public class GlideDrawableImageViewTarget extends ImageViewTarget<GlideDrawable>
      *
      * @param resource {@inheritDoc}
      * @param animation {@inheritDoc}
+     * 方法中做了一些逻辑处理，包括如果是GIF图片的话，就调用resource.start()方法开始播放图片，
+     * 但是好像并没有看到哪里有将GlideDrawable显示到ImageView上的逻辑。
+     * 看父类有将GlideDrawable显示到ImageView上的逻辑。
      */
     @Override
     public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> animation) {
@@ -74,6 +77,7 @@ public class GlideDrawableImageViewTarget extends ImageViewTarget<GlideDrawable>
      * {@link android.widget.ImageView#setImageDrawable(android.graphics.drawable.Drawable)}.
      *
      * @param resource The {@link android.graphics.drawable.Drawable} to display in the view.
+     * ，调用的view.setImageDrawable()方法，而这个view就是ImageView。代码执行到这里，图片终于也就显示出来了
      */
     @Override
     protected void setResource(GlideDrawable resource) {

@@ -55,7 +55,10 @@ class EngineRunnable implements Runnable, Prioritized {
         Exception exception = null;
         Resource<?> resource = null;
         try {
+            // 调用了一个decode()方法，并且这个方法返回了一个Resource对象。
+            // 进去看看
             resource = decode();
+            // 绕一圈回来了，接下来就是如何将它显示出来了
         } catch (Exception e) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "Exception decoding", e);
@@ -73,6 +76,7 @@ class EngineRunnable implements Runnable, Prioritized {
         if (resource == null) {
             onLoadFailed(exception);
         } else {
+            // 表示图片加载已经完成了,进去
             onLoadComplete(resource);
         }
     }
@@ -82,6 +86,7 @@ class EngineRunnable implements Runnable, Prioritized {
     }
 
     private void onLoadComplete(Resource resource) {
+        // 这个manager就是EngineJob对象，因此这里实际上调用的是EngineJob的onResourceReady()方法
         manager.onResourceReady(resource);
     }
 
@@ -94,10 +99,16 @@ class EngineRunnable implements Runnable, Prioritized {
         }
     }
 
+    /**
+     * 分了两种情况，
+     * 从缓存当中去decode图片的话就会执行decodeFromCache()，
+     * 否则的话就执行decodeFromSource()
+     */
     private Resource<?> decode() throws Exception {
         if (isDecodingFromCache()) {
             return decodeFromCache();
         } else {
+            // 进去看看不讨论缓存的情况
             return decodeFromSource();
         }
     }
@@ -119,6 +130,7 @@ class EngineRunnable implements Runnable, Prioritized {
     }
 
     private Resource<?> decodeFromSource() throws Exception {
+        //调用了DecodeJob的decodeFromSource()方法。DecodeJob的任务十分繁重,进去看看
         return decodeJob.decodeFromSource();
     }
 

@@ -45,9 +45,14 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
         this.decodeFormat = decodeFormat;
     }
 
+    /**
+     *  返回的是一个Resource<Bitmap>对象,而我们从Downsampler中得到的是一个Bitmap对象
+     */
     @Override
     public Resource<Bitmap> decode(InputStream source, int width, int height) {
+        // decode()方法又去调用了Downsampler的decode()方法
         Bitmap bitmap = downsampler.decode(source, bitmapPool, width, height, decodeFormat);
+        // 调用了BitmapResource.obtain()方法，将Bitmap对象包装成了Resource<Bitmap>对象,进去
         return BitmapResource.obtain(bitmap, bitmapPool);
     }
 

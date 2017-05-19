@@ -73,6 +73,10 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
         future = sourceService.submit(runnable);
     }
 
+    /**
+     * 它会向cbs集合中去添加ResourceCallback,
+     * 这个addCallback()方法又是哪里调用的呢？其实调用的地方我们早就已经看过了，只不过之前没有注意，现在重新来看一下Engine的load()方法
+     */
     public void addCallback(ResourceCallback cb) {
         Util.assertMainThread();
         if (hasResource) {
@@ -134,6 +138,8 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
     @Override
     public void onResourceReady(final Resource<?> resource) {
         this.resource = resource;
+        // 在onResourceReady()方法使用Handler发出了一条MSG_COMPLETE消息
+        // 那么在MainThreadCallback的handleMessage()方法中就会收到这条消息
         MAIN_THREAD_HANDLER.obtainMessage(MSG_COMPLETE, this).sendToTarget();
     }
 
@@ -155,6 +161,8 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
         for (ResourceCallback cb : cbs) {
             if (!isInIgnoredCallbacks(cb)) {
                 engineResource.acquire();
+                // 调用了所有ResourceCallback的onResourceReady()方法
+                // 那么这个ResourceCallback是什么呢？答案在addCallback()方法当中，它会向cbs集合中去添加ResourceCallback。
                 cb.onResourceReady(engineResource);
             }
         }
@@ -199,6 +207,8 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
             if (MSG_COMPLETE == message.what || MSG_EXCEPTION == message.what) {
                 EngineJob job = (EngineJob) message.obj;
                 if (MSG_COMPLETE == message.what) {
+                    // 调用了handleResultOnMainThread()方法，
+                    // 这个方法中又通过一个循环，调用了所有ResourceCallback的onResourceReady()方法
                     job.handleResultOnMainThread();
                 } else {
                     job.handleExceptionOnMainThread();

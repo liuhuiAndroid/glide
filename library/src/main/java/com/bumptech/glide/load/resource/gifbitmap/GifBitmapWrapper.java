@@ -13,6 +13,9 @@ public class GifBitmapWrapper {
     private final Resource<GifDrawable> gifResource;
     private final Resource<Bitmap> bitmapResource;
 
+    /**
+     * 分别对gifResource和bitmapResource做了一层封装而已，相信没有什么解释的必要。
+     */
     public GifBitmapWrapper(Resource<Bitmap> bitmapResource, Resource<GifDrawable> gifResource) {
         if (bitmapResource != null && gifResource != null) {
             throw new IllegalArgumentException("Can only contain either a bitmap resource or a gif resource, not both");

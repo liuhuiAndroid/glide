@@ -183,10 +183,11 @@ public class Engine implements EngineJobListener,
         // 创建了一个DecodeJob对象，从名字上来看，它好像是用来对图片进行解码的，但实际上它的任务十分繁重，待会我们就知道了
         DecodeJob<T, Z, R> decodeJob = new DecodeJob<T, Z, R>(key, width, height, fetcher, loadProvider, transformation,
                 transcoder, diskCacheProvider, diskCacheStrategy, priority);
-        // 创建了一个EngineRunnable对象，并且在51行调用了EngineJob的start()方法来运行EngineRunnable对象，
-        // 这实际上就是让EngineRunnable的run()方法在子线程当中执行了。
+        // 创建了一个EngineRunnable对象，并且在下面调用了EngineJob的start()方法来运行EngineRunnable对象，
+        // 这实际上就是让EngineRunnable的run()方法在子线程当中执行了。// 进去run方法看看
         EngineRunnable runnable = new EngineRunnable(engineJob, decodeJob, priority);
         jobs.put(key, engineJob);
+        // 就是在这里调用的EngineJob的addCallback()方法来注册的一个ResourceCallback
         engineJob.addCallback(cb);
         engineJob.start(runnable);
 

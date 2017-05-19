@@ -475,6 +475,8 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         loadedFromMemoryCache = true;
         // 这里将刚才获得的ImageVideoFetcher、GifBitmapWrapperDrawableTranscoder等等一系列的值一起传入到了Engine的load()方法当中
         // 进去看看
+        // 注意最后一个参数，this。没错，就是this。GenericRequest本身就实现了ResourceCallback的接口，
+        // 因此EngineJob的回调最终其实就是回调到了GenericRequest的onResourceReady()方法当中了
         loadStatus = engine.load(signature, width, height, dataFetcher, loadProvider, transformation, transcoder,
                 priority, isMemoryCacheable, diskCacheStrategy, this);
         loadedFromMemoryCache = resource != null;
@@ -513,6 +515,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             return;
         }
 
+        // 调用resource.get()方法获取到了封装的图片对象，也就是GlideBitmapDrawable对象，或者是GifDrawable对象
         Object received = resource.get();
         if (received == null || !transcodeClass.isAssignableFrom(received.getClass())) {
             releaseResource(resource);
@@ -533,6 +536,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
             return;
         }
 
+        // 然后将这个值传入到了第二个onResourceReady()方法当中
         onResourceReady(resource, (R) received);
     }
 
@@ -551,6 +555,10 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         if (requestListener == null || !requestListener.onResourceReady(result, model, target, loadedFromMemoryCache,
                 isFirstResource)) {
             GlideAnimation<R> animation = animationFactory.build(loadedFromMemoryCache, isFirstResource);
+            // 调用了target.onResourceReady()方法
+            // 那么这个target又是什么呢？这个又需要向上翻很久了，在第三步into()方法的一开始，我们就分析了在into()方法的最后一行，
+            // 调用了glide.buildImageViewTarget()方法来构建出一个Target，而这个Target就是一个GlideDrawableImageViewTarget对象。
+            // 看GlideDrawableImageViewTarget的源码
             target.onResourceReady(result, animation);
         }
 

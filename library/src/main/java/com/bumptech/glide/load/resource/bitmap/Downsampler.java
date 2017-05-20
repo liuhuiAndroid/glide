@@ -102,7 +102,9 @@ public abstract class Downsampler implements BitmapDecoder<InputStream> {
      * @return A new bitmap containing the image from the given InputStream, or recycle if recycle is not null.
      * 对服务器返回的InputStream的读取，以及对图片的加载全都在这里了
      * 这里其实处理了很多的逻辑，包括对图片的压缩，甚至还有旋转、圆角等逻辑处理
-     * decode()方法执行之后，会返回一个Bitmap对象，那么图片在这里其实也就已经被加载出来了，剩下的工作就是如果让这个Bitmap显示到界面上
+     * 编码过程中通过设置采样率缩放图片，降低内存占用，提高加载性能
+     * decode()方法执行之后，会返回一个Bitmap对象，那么图片在这里其实也就已经被加载出来了，
+     * 剩下的工作就是如果让这个Bitmap显示到界面上
      */
     @SuppressWarnings("resource")
     // see BitmapDecoder.decode

@@ -77,7 +77,7 @@ public class GlideDrawableImageViewTarget extends ImageViewTarget<GlideDrawable>
      * {@link android.widget.ImageView#setImageDrawable(android.graphics.drawable.Drawable)}.
      *
      * @param resource The {@link android.graphics.drawable.Drawable} to display in the view.
-     * ，调用的view.setImageDrawable()方法，而这个view就是ImageView。代码执行到这里，图片终于也就显示出来了
+     * 调用的view.setImageDrawable()方法，而这个view就是ImageView。代码执行到这里，图片终于也就显示出来了
      */
     @Override
     protected void setResource(GlideDrawable resource) {

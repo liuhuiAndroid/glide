@@ -65,6 +65,8 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
 
     public void start(EngineRunnable engineRunnable) {
         this.engineRunnable = engineRunnable;
+        // diskCacheService的类型是ThreadPoolExecutor的子类FifoPriorityThreadPoolExecutor，
+        // 也就是说将engineRunnable放入线程池中执行。
         future = diskCacheService.submit(engineRunnable);
     }
 

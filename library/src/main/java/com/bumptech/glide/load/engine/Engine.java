@@ -151,6 +151,7 @@ public class Engine implements EngineJobListener,
                 loadProvider.getSourceDecoder(), transformation, loadProvider.getEncoder(),
                 transcoder, loadProvider.getSourceEncoder());
 
+        //先从cache中寻找资源,cache是LruResourceCache对象，作为资源的LRU缓存
         EngineResource<?> cached = loadFromCache(key, isMemoryCacheable);
         if (cached != null) {
             cb.onResourceReady(cached);
@@ -160,6 +161,9 @@ public class Engine implements EngineJobListener,
             return null;
         }
 
+        // 从activeResources中寻找
+        // activeResources是以弱引用为值的Map，用于缓存使用中的资源
+        // 比一般内存缓存额外多一级缓存的意义在于，当内存不足时清理cache中的资源时，不会对使用中的Bitmap造成影响。
         EngineResource<?> active = loadFromActiveResources(key, isMemoryCacheable);
         if (active != null) {
             cb.onResourceReady(active);
@@ -178,6 +182,7 @@ public class Engine implements EngineJobListener,
             return new LoadStatus(cb, current);
         }
 
+        // cache中找不到
         // 这里构建了一个EngineJob，它的主要作用就是用来开启线程的，为后面的异步加载图片做准备。
         EngineJob engineJob = engineJobFactory.build(key, isMemoryCacheable);
         // 创建了一个DecodeJob对象，从名字上来看，它好像是用来对图片进行解码的，但实际上它的任务十分繁重，待会我们就知道了

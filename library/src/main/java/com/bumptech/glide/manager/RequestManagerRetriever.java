@@ -85,6 +85,7 @@ public class RequestManagerRetriever implements Handler.Callback {
             throw new IllegalArgumentException("You cannot start a load on a null Context");
         } else if (Util.isOnMainThread() && !(context instanceof Application)) {
             if (context instanceof FragmentActivity) {
+                // AppCompatActivity是FragmentActivity的子类
                 return get((FragmentActivity) context);
             } else if (context instanceof Activity) {
                 return get((Activity) context);
@@ -197,7 +198,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
 
     RequestManager supportFragmentGet(Context context, FragmentManager fm) {
-        // 141
+        // SupportRequestManagerFragment 是一个无界面的Fragment类，起到把请求和Activity生命周期同步的作用
         SupportRequestManagerFragment current = getSupportRequestManagerFragment(fm);
         RequestManager requestManager = current.getRequestManager();
         if (requestManager == null) {

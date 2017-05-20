@@ -178,6 +178,8 @@ class DecodeJob<A, T, Z> {
             long startTime = LogTime.getLogTime();
             // 调用了fetcher.loadData()方法
             // 这个fetcher是什么呢？其实就是刚才在onSizeReady()方法中得到的ImageVideoFetcher对象，这里调用它的loadData()方法
+            // 先通过DataFetcher访问网络获得文件流
+            // 接口DataFetcher的实现类根据配置而不同，设置为通过OkHttp3进行网络通信的情况下，该实现类为OkHttpStreamFetcher???到底是哪个
             final A data = fetcher.loadData(priority);
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 logWithTimeAndKey("Fetched data", startTime);

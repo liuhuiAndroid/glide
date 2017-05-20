@@ -55,6 +55,7 @@ class EngineRunnable implements Runnable, Prioritized {
         Exception exception = null;
         Resource<?> resource = null;
         try {
+            // 编码
             // 调用了一个decode()方法，并且这个方法返回了一个Resource对象。
             // 进去看看
             resource = decode();

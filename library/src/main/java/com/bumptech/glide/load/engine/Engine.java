@@ -146,10 +146,13 @@ public class Engine implements EngineJobListener,
         Util.assertMainThread();
         long startTime = LogTime.getLogTime();
 
+        // 获得了一个id字符串，这个字符串也就是我们要加载的图片的唯一标识
         final String id = fetcher.getId();
+        // 构建出了一个EngineKey对象，这个EngineKey也就是Glide中的缓存Key
         EngineKey key = keyFactory.buildKey(id, signature, width, height, loadProvider.getCacheDecoder(),
                 loadProvider.getSourceDecoder(), transformation, loadProvider.getEncoder(),
                 transcoder, loadProvider.getSourceEncoder());
+
 
         //先从cache中寻找资源,cache是LruResourceCache对象，作为资源的LRU缓存
         EngineResource<?> cached = loadFromCache(key, isMemoryCacheable);
@@ -211,6 +214,8 @@ public class Engine implements EngineJobListener,
             return null;
         }
 
+        // 从activeResources这个HashMap当中取值的。
+        // 使用activeResources来缓存正在使用中的图片，可以保护这些图片不会被LruCache算法回收掉。
         EngineResource<?> active = null;
         WeakReference<EngineResource<?>> activeRef = activeResources.get(key);
         if (activeRef != null) {
@@ -227,12 +232,17 @@ public class Engine implements EngineJobListener,
 
     private EngineResource<?> loadFromCache(Key key, boolean isMemoryCacheable) {
         if (!isMemoryCacheable) {
+            // skipMemoryCache()方法吗？如果在这个方法中传入true，那么这里的isMemoryCacheable就会是false,
+            // 表示内存缓存已被禁用
             return null;
         }
 
+        // 调用了getEngineResourceFromCache()方法来获取缓存
         EngineResource<?> cached = getEngineResourceFromCache(key);
         if (cached != null) {
             cached.acquire();
+            // 将这个缓存图片存储到activeResources当中,activeResources就是一个弱引用的HashMap，用来缓存正在使用中的图片
+            //
             activeResources.put(key, new ResourceWeakReference(key, cached, getReferenceQueue()));
         }
         return cached;
@@ -240,6 +250,10 @@ public class Engine implements EngineJobListener,
 
     @SuppressWarnings("unchecked")
     private EngineResource<?> getEngineResourceFromCache(Key key) {
+        // cache对象就是在构建Glide对象时创建的LruResourceCache，
+        // 那么说明这里其实使用的就是LruCache算法了
+
+        //获取到缓存图片之后会将它从缓存中移除
         Resource<?> cached = cache.remove(key);
 
         final EngineResource result;
@@ -272,6 +286,8 @@ public class Engine implements EngineJobListener,
             resource.setResourceListener(key, this);
 
             if (resource.isCacheable()) {
+                // EngineJob中onEngineJobComplete回调过来的EngineResource被put到了activeResources当中，
+                // 也就是在这里写入的缓存
                 activeResources.put(key, new ResourceWeakReference(key, resource, getReferenceQueue()));
             }
         }
@@ -294,11 +310,16 @@ public class Engine implements EngineJobListener,
         resourceRecycler.recycle(resource);
     }
 
+    /**
+     * 实现了正在使用中的图片使用弱引用来进行缓存，不在使用中的图片使用LruCache来进行缓存的功能。
+     */
     @Override
     public void onResourceReleased(Key cacheKey, EngineResource resource) {
         Util.assertMainThread();
+        // 首先会将缓存图片从activeResources中移除
         activeResources.remove(cacheKey);
         if (resource.isCacheable()) {
+            // 然后再将它put到LruResourceCache当中
             cache.put(cacheKey, resource);
         } else {
             resourceRecycler.recycle(resource);

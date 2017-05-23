@@ -82,6 +82,7 @@ class DecodeJob<A, T, Z> {
         }
 
         long startTime = LogTime.getLogTime();
+        // 调用了loadFromCache()方法从缓存当中读取数据,传入的是resultKey
         Resource<T> transformed = loadFromCache(resultKey);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logWithTimeAndKey("Decoded transformed from cache", startTime);
@@ -106,10 +107,13 @@ class DecodeJob<A, T, Z> {
         }
 
         long startTime = LogTime.getLogTime();
+        // 调用了loadFromCache()方法从缓存当中读取数据，调用了resultKey的getOriginalKey()方法
+        // 缓存的原始图片，其实并不需要这么多的参数，因为不用对图片做任何的变化
         Resource<T> decoded = loadFromCache(resultKey.getOriginalKey());
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logWithTimeAndKey("Decoded source from cache", startTime);
         }
+        // 调用一下transformEncodeAndTranscode()方法先将数据转换一下再解码并返回
         return transformEncodeAndTranscode(decoded);
     }
 

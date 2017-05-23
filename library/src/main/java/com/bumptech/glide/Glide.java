@@ -152,6 +152,7 @@ public class Glide {
                     for (GlideModule module : modules) {
                         module.applyOptions(applicationContext, builder);
                     }
+                    // 创建Glide对象
                     glide = builder.createGlide();
                     for (GlideModule module : modules) {
                         module.registerComponents(applicationContext, glide);
@@ -544,6 +545,7 @@ public class Glide {
             }
             return null;
         }
+        // 构建ModelLoader对象的时候，先调用了一个Glide.get()方法，而这个方法就是缓存的关键
         return Glide.get(context).getLoaderFactory().buildModelLoader(modelClass, resourceClass);
     }
 

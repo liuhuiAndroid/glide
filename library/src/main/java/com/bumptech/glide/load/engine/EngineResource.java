@@ -97,6 +97,8 @@ class EngineResource<Z> implements Resource<Z> {
             throw new IllegalThreadStateException("Must call release on the main thread");
         }
         if (--acquired == 0) {
+            // 如果acquired变量等于0了，说明图片已经不再被使用了
+            // 释放资源，这个listener就是Engine对象
             listener.onResourceReleased(key, this);
         }
     }

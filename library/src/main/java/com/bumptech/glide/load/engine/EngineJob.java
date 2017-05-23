@@ -157,7 +157,10 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
 
         // Hold on to resource for duration of request so we don't recycle it in the middle of notifying if it
         // synchronously released by one of the callbacks.
+        // EngineResource是用一个acquired变量用来记录图片被引用的次数，
+        // 调用acquire()方法会让变量加1，调用release()方法会让变量减1
         engineResource.acquire();
+        //
         listener.onEngineJobComplete(key, engineResource);
 
         for (ResourceCallback cb : cbs) {

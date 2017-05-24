@@ -156,9 +156,11 @@ public class Engine implements EngineJobListener,
                 transcoder, loadProvider.getSourceEncoder());
 
 
-        //先从cache中寻找资源,cache是LruResourceCache对象，作为资源的LRU缓存
+        // 方法一
+        // 先从cache中寻找资源,cache是LruResourceCache对象，作为资源的LRU缓存
         EngineResource<?> cached = loadFromCache(key, isMemoryCacheable);
         if (cached != null) {
+            // 如果获取到就直接调用cb.onResourceReady()方法进行回调
             cb.onResourceReady(cached);
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 logWithTimeAndKey("Loaded resource from cache", startTime, key);
@@ -166,11 +168,13 @@ public class Engine implements EngineJobListener,
             return null;
         }
 
+        // 方法二
         // 从activeResources中寻找
         // activeResources是以弱引用为值的Map，用于缓存使用中的资源
         // 比一般内存缓存额外多一级缓存的意义在于，当内存不足时清理cache中的资源时，不会对使用中的Bitmap造成影响。
         EngineResource<?> active = loadFromActiveResources(key, isMemoryCacheable);
         if (active != null) {
+            // 获取到的话也直接进行回调
             cb.onResourceReady(active);
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 logWithTimeAndKey("Loaded resource from active resources", startTime, key);
@@ -187,7 +191,7 @@ public class Engine implements EngineJobListener,
             return new LoadStatus(cb, current);
         }
 
-        // cache中找不到
+        // cache中找不到 // 只有在上面两个方法都没有获取到缓存的情况下，才会继续向下执行，从而开启线程来加载图片。
         // 这里构建了一个EngineJob，它的主要作用就是用来开启线程的，为后面的异步加载图片做准备。
         EngineJob engineJob = engineJobFactory.build(key, isMemoryCacheable);
         // 创建了一个DecodeJob对象，从名字上来看，它好像是用来对图片进行解码的，但实际上它的任务十分繁重，待会我们就知道了
@@ -234,7 +238,7 @@ public class Engine implements EngineJobListener,
 
     private EngineResource<?> loadFromCache(Key key, boolean isMemoryCacheable) {
         if (!isMemoryCacheable) {
-            // skipMemoryCache()方法吗？如果在这个方法中传入true，那么这里的isMemoryCacheable就会是false,
+            // skipMemoryCache()方法，如果在这个方法中传入true，那么这里的isMemoryCacheable就会是false,
             // 表示内存缓存已被禁用
             return null;
         }
@@ -244,7 +248,6 @@ public class Engine implements EngineJobListener,
         if (cached != null) {
             cached.acquire();
             // 将这个缓存图片存储到activeResources当中,activeResources就是一个弱引用的HashMap，用来缓存正在使用中的图片
-            //
             activeResources.put(key, new ResourceWeakReference(key, cached, getReferenceQueue()));
         }
         return cached;
@@ -289,7 +292,7 @@ public class Engine implements EngineJobListener,
 
             if (resource.isCacheable()) {
                 // EngineJob中onEngineJobComplete回调过来的EngineResource被put到了activeResources当中，
-                // 也就是在这里写入的缓存
+                // 也就是在这里写入的弱引用缓存
                 activeResources.put(key, new ResourceWeakReference(key, resource, getReferenceQueue()));
             }
         }

@@ -165,6 +165,9 @@ public class GlideBuilder {
         return this;
     }
 
+    /**
+     * 构建Glide对象
+     */
     Glide createGlide() {
         if (sourceService == null) {
             final int cores = Math.max(1, Runtime.getRuntime().availableProcessors());

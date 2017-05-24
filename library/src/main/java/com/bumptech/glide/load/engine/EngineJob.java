@@ -152,6 +152,7 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
         } else if (cbs.isEmpty()) {
             throw new IllegalStateException("Received a resource without any callbacks to notify");
         }
+        // 这里通过EngineResourceFactory构建出了一个包含图片资源的EngineResource对象
         engineResource = engineResourceFactory.build(resource, isCacheable);
         hasResource = true;
 
@@ -160,7 +161,8 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
         // EngineResource是用一个acquired变量用来记录图片被引用的次数，
         // 调用acquire()方法会让变量加1，调用release()方法会让变量减1
         engineResource.acquire();
-        //
+
+        // 将这个对象回调到Engine的onEngineJobComplete()方法当中
         listener.onEngineJobComplete(key, engineResource);
 
         for (ResourceCallback cb : cbs) {

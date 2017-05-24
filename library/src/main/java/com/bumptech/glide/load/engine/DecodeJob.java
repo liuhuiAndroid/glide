@@ -132,9 +132,9 @@ class DecodeJob<A, T, Z> {
      * 第二步是调用transformEncodeAndTranscode()方法来处理这个Resource对象。
      */
     public Resource<Z> decodeFromSource() throws Exception {
-        // 进去看看
+        // 进去看看，解析原图片
         Resource<T> decoded = decodeSource();
-        //看完上面的逻辑再进去瞧瞧
+        //看完上面的逻辑再进去瞧瞧，用来对图片进行转换和转码的
         return transformEncodeAndTranscode(decoded);
     }
 

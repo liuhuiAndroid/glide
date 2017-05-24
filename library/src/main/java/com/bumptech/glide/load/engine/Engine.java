@@ -146,8 +146,10 @@ public class Engine implements EngineJobListener,
         Util.assertMainThread();
         long startTime = LogTime.getLogTime();
 
-        // 获得了一个id字符串，这个字符串也就是我们要加载的图片的唯一标识
+        // 获得了一个id字符串，这个字符串也就是我们要加载的图片的唯一标识，这个id其实就是图片的url地址
+        // fetcher就是HttpUrlFetcher的实例
         final String id = fetcher.getId();
+
         // 构建出了一个EngineKey对象，这个EngineKey也就是Glide中的缓存Key
         EngineKey key = keyFactory.buildKey(id, signature, width, height, loadProvider.getCacheDecoder(),
                 loadProvider.getSourceDecoder(), transformation, loadProvider.getEncoder(),

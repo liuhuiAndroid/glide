@@ -116,6 +116,8 @@ public class GlideUrl {
      * <p> This method does not include headers. </p>
      *
      * <p> Unlike {@link #toStringUrl()}} and {@link #toURL()}, this method does not escape input. </p>
+     *
+     * 直接就是将图片的url地址进行返回来作为缓存Key的
      */
     public String getCacheKey() {
       return stringUrl != null ? stringUrl : url.toString();

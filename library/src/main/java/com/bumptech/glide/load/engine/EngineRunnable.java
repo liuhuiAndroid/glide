@@ -110,7 +110,7 @@ class EngineRunnable implements Runnable, Prioritized {
             // 从硬盘缓存当中读取图片
             return decodeFromCache();
         } else {
-            // 进去看看不讨论缓存的情况
+            // 进去看看，不讨论缓存的情况
             return decodeFromSource();
         }
     }

@@ -148,11 +148,13 @@ class DecodeJob<A, T, Z> {
      */
     private Resource<Z> transformEncodeAndTranscode(Resource<T> decoded) {
         long startTime = LogTime.getLogTime();
+        // 调用transform()方法来对图片进行转换
         Resource<T> transformed = transform(decoded);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logWithTimeAndKey("Transformed resource from source", startTime);
         }
 
+        // 在writeTransformedToCache()方法中将转换过后的图片写入到硬盘缓存中，
         writeTransformedToCache(transformed);
 
         startTime = LogTime.getLogTime();
@@ -170,6 +172,7 @@ class DecodeJob<A, T, Z> {
         }
         long startTime = LogTime.getLogTime();
         SourceWriter<Resource<T>> writer = new SourceWriter<Resource<T>>(loadProvider.getEncoder(), transformed);
+        // // 调用的同样是DiskLruCache实例的put()方法，不过这里用的缓存Key是resultKey
         diskCacheProvider.getDiskCache().put(resultKey, writer);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logWithTimeAndKey("Wrote transformed from source to cache", startTime);
@@ -184,6 +187,8 @@ class DecodeJob<A, T, Z> {
             // 这个fetcher是什么呢？其实就是刚才在onSizeReady()方法中得到的ImageVideoFetcher对象，这里调用它的loadData()方法
             // 先通过DataFetcher访问网络获得文件流
             // 接口DataFetcher的实现类根据配置而不同，设置为通过OkHttp3进行网络通信的情况下，该实现类为OkHttpStreamFetcher???到底是哪个
+
+            // 调用fetcher的loadData()方法读取图片数据
             final A data = fetcher.loadData(priority);
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 logWithTimeAndKey("Fetched data", startTime);
@@ -191,7 +196,7 @@ class DecodeJob<A, T, Z> {
             if (isCancelled) {
                 return null;
             }
-            // 进去看看
+            // 进去看看 对图片进行解码
             decoded = decodeFromSourceData(data);
         } finally {
             fetcher.cleanup();
@@ -204,7 +209,10 @@ class DecodeJob<A, T, Z> {
      */
     private Resource<T> decodeFromSourceData(A data) throws IOException {
         final Resource<T> decoded;
+
+        // 是否允许缓存原始图片
         if (diskCacheStrategy.cacheSource()) {
+            // 允许缓存原始图片
             decoded = cacheAndDecodeSourceData(data);
         } else {
             long startTime = LogTime.getLogTime();
@@ -222,6 +230,8 @@ class DecodeJob<A, T, Z> {
     private Resource<T> cacheAndDecodeSourceData(A data) throws IOException {
         long startTime = LogTime.getLogTime();
         SourceWriter<A> writer = new SourceWriter<A>(loadProvider.getSourceEncoder(), data);
+        // 调用了getDiskCache()方法来获取DiskLruCache实例，接着调用它的put()方法就可以写入硬盘缓存了
+        // 注意原始图片的缓存Key是用的resultKey.getOriginalKey()
         diskCacheProvider.getDiskCache().put(resultKey.getOriginalKey(), writer);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logWithTimeAndKey("Wrote source to cache", startTime);
@@ -236,11 +246,14 @@ class DecodeJob<A, T, Z> {
     }
 
     private Resource<T> loadFromCache(Key key) throws IOException {
+        // getDiskCache()方法获取到的就是Glide自己编写的DiskLruCache工具类的实例
+        // 然后调用它的get()方法并把缓存Key传入，就能得到硬盘缓存的文件了
         File cacheFile = diskCacheProvider.getDiskCache().get(key);
         if (cacheFile == null) {
             return null;
         }
 
+        // 如果文件不为空则将它解码成Resource对象后返回即可
         Resource<T> result = null;
         try {
             result = loadProvider.getCacheDecoder().decode(cacheFile, width, height);
